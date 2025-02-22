@@ -16,15 +16,14 @@ func main() {
 	_ = csvreader.WriteRegionCodesToCSV("test.csv", regionData)
 	//create distributoprs
 	distributor1 := internal.NewDistributor("DISTRIBUTOR1")
-	distributor1.Include("INDIA")
-	distributor1.Include("UNITEDSTATES")
-	distributor1.Exclude("KARNATAKA-INDIA")
-	distributor1.Exclude("CHENNAI-TAMILNADU-INDIA")
+	distributor1.Include("India")
+	distributor1.Exclude("Haryana-India")
+	// distributor1.Exclude("CHENNAI-TAMILNADU-INDIA")
 
 	//dummy test regions and adders
 	regionCode := "NARNA-HR-IN"
 	if region, exists := regionData[regionCode]; exists {
-		canDistribute := distributor1.CanDistribute(regionCode)
+		canDistribute := distributor1.CanDistribute(regionCode, regionData)
 		fmt.Printf("Can DISTRIBUTOR1 distribute in %s? %v\n", region.String(), canDistribute)
 	} else {
 		fmt.Printf("Region %s not found in data\n", regionCode)

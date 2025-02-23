@@ -1,9 +1,8 @@
 package store
 
 import (
+	"challange2016/internal/models"
 	"strings"
-
-	"github.com/challenge2016/models"
 )
 
 type store struct {
@@ -22,7 +21,7 @@ func (s *store) AddDistributor(obj *models.Distributor) *models.Distributor {
 
 	// get call
 
-	return s.GetDistributorByName(ctx, reqBody.Name)
+	return s.GetDistributorByName(obj.Name)
 }
 
 func (s *store) GetDistributorByName(distributorName string) *models.Distributor {

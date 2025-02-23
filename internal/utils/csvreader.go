@@ -44,15 +44,37 @@ func LoadCsvIntoLocalStores(storeMap *models.DistributionMaps, fileName string) 
 			Country:      record[5],
 		}
 
-		storeMap.CityMap[strings.ToUpper(loc.City)] = &loc
-		loc.City = "ALL"
-		loc.CityCode = "ALL"
-		storeMap.ProvinceMap[strings.ToUpper(loc.Province)] = &loc
-		loc.Province = "ALL"
-		loc.ProvinceCode = "ALL"
-		storeMap.CountryMap[strings.ToUpper(loc.Country)] = &loc
+		//was not settting it prooperly
+		// storeMap.CityMap[strings.ToUpper(loc.City)] = &loc
+		// loc.City = "ALL"
+		// loc.CityCode = "ALL"
+		// storeMap.ProvinceMap[strings.ToUpper(loc.Province)] = &loc
+		// loc.Province = "ALL"
+		// loc.ProvinceCode = "ALL"
+		// storeMap.CountryMap[strings.ToUpper(loc.Country)] = &loc
+		setCityMap(storeMap, loc)
+		setProvinceMap(storeMap, loc)
+		setCountryMap(storeMap, loc)
 
 	}
 
 	return nil
+}
+
+func setCityMap(dMap *models.DistributionMaps, loc models.Location) {
+	dMap.CityMap[strings.ToUpper(loc.City)] = &loc
+}
+
+func setProvinceMap(dMap *models.DistributionMaps, loc models.Location) {
+	loc.City = "ALL"
+	loc.CityCode = "ALL"
+	dMap.ProvinceMap[strings.ToUpper(loc.Province)] = &loc
+}
+
+func setCountryMap(dMap *models.DistributionMaps, loc models.Location) {
+	loc.City = "ALL"
+	loc.CityCode = "ALL"
+	loc.Province = "ALL"
+	loc.ProvinceCode = "ALL"
+	dMap.CountryMap[strings.ToUpper(loc.Country)] = &loc
 }

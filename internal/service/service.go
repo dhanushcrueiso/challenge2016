@@ -27,26 +27,28 @@ func (s *service) AddDistributor(reqBody *models.Distributor) (*models.Distribut
 	if distributor != nil {
 		return nil, errors.New("distributor already exist")
 	}
-
+	fmt.Println("checking pas throgugh two", reqBody.Include)
 	// initilise include fields
-	reqBody.Include = s.autoInitialiseFields(reqBody.Include)
-
+	reqBody.Include = s.AutoInitialiseFields(reqBody.Include)
+	fmt.Println("checking pas throgugh three", reqBody.Exclude)
 	// initialise exclude fields
-	reqBody.Exclude = s.autoInitialiseFields(reqBody.Exclude)
-
+	reqBody.Exclude = s.AutoInitialiseFields(reqBody.Exclude)
+	fmt.Println("checking pas throgugh four")
 	// if parentDistributor exist, assign exclude fields also
 	if reqBody.ParentDistributor != nil {
+		fmt.Println("checking pas throgugh four-1")
 		isAllowed := s.checkParentDistributorPermissions(reqBody)
 		if !isAllowed {
 			return nil, errors.New("Parent Distributor doesn't have permission to distribute these location")
 		}
-
+		fmt.Println("checking pas throgugh four-2")
 		upperCaseName := strings.ToUpper(*reqBody.ParentDistributor)
 		reqBody.ParentDistributor = &upperCaseName
 	}
-
+	fmt.Println("checking pas throgugh five")
 	// store layer call
 	response := s.store.AddDistributor(reqBody)
+	fmt.Println("checking pas throgugh six")
 
 	return response, nil
 }
@@ -143,13 +145,16 @@ func checkPermission(distributorLoc []models.Location, loc models.Location) bool
 	return false
 }
 
-func (s *service) autoInitialiseFields(loc []models.Location) []models.Location {
+func (s *service) AutoInitialiseFields(loc []models.Location) []models.Location {
 	for i := range loc {
+
 		if loc[i].City != "" {
 			loc[i] = *s.store.GetLocationDetailsByCity(loc[i].City)
 		} else if loc[i].Province != "" {
+
 			loc[i] = *s.store.GetLocationDetailsByProvince(loc[i].Province)
 		} else if loc[i].Country != "" {
+
 			loc[i] = *s.store.GetLocationDetailsByCountry(loc[i].Country)
 		}
 	}

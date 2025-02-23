@@ -7,6 +7,7 @@ import (
 	"challange2016/internal/store"
 	"challange2016/internal/utils"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -27,8 +28,9 @@ func main() {
 	for {
 		fmt.Println("Choose an option:")
 		fmt.Println("1. Add new permission")
-		fmt.Println("2. Check permission")
-		fmt.Println("3. Exit")
+		fmt.Println("2. Get Distributor With Name")
+		fmt.Println("3. Check Distributor Permission")
+		fmt.Println("4. Exit")
 
 		var option int
 		_, err := fmt.Scan(&option)
@@ -60,10 +62,11 @@ func main() {
 
 			}
 
-			fmt.Print("Enter Inclisions and Exclusions and EXIT for exiting the input loop: ")
 			var includes []models.Location
 			var excludes []models.Location
 			for {
+				fmt.Println("Enter Inclisions and Exclusions : ")
+				fmt.Println("Enter Exit to exit")
 				var permission string
 				scanner.Scan() // This waits for the user input
 				permission = scanner.Text()
@@ -106,6 +109,7 @@ func main() {
 						includes = append(includes, tempLocation)
 					} else if permissionTypeStr == "EXCLUDE" {
 						excludes = append(excludes, tempLocation)
+						log.Println("check", excludes)
 					}
 
 				} else if len(parts) == 3 {
@@ -127,11 +131,12 @@ func main() {
 				}
 
 			}
-			fmt.Println("obj", distributorobj)
+			fmt.Println("obj")
 			response, err := svc.AddDistributor(&distributorobj)
 			if err != nil {
 				fmt.Println(err)
 			}
+			fmt.Println("checking pas throgugh seven")
 			fmt.Println("response", response)
 		case 2:
 			var distributorName string
@@ -146,11 +151,34 @@ func main() {
 			}
 			fmt.Println("distributor name", distributor)
 		case 3:
-			for k, v := range storeMap.Distributor {
-				fmt.Println("distributor maps", k)
-				fmt.Println("distributor maps", v)
+			var permission string
+			scanner.Scan() // This waits for the user input
+			permission = scanner.Text()
+			permission = strings.TrimSpace(permission)
+			partspermission := strings.Split(permission, ":")
+			if len(partspermission) != 2 {
+				fmt.Println("Invalid input format. Please use the format 'NAME: City-PROVINCE-Country.")
+				continue
+			}
+			name := partspermission[0]
+			parts := strings.Split(partspermission[1], "-")
+			if len(parts) != 3 {
+				fmt.Println("invallid input format")
+				break
+			}
+			loc := models.Location{
+				City:     parts[0],
+				Country:  parts[2],
+				Province: parts[1],
+			}
+			checkPermission := models.CheckPermission{
+				DistributorName: &name,
+				Loc:             &loc,
 			}
 
+			response := svc.CheckDistributorPermission(checkPermission)
+			fmt.Println("response", response)
+		case 4:
 			os.Exit(0)
 		default:
 			fmt.Println("Invalid option. Please choose 1, 2, or 3.")

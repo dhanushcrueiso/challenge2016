@@ -48,12 +48,10 @@ func (s *store) GetLocationDetailsByCity(cityName string) *models.Location {
 
 func (s *store) GetLocationDetailsByProvince(province string) *models.Location {
 	province = strings.ToUpper(province)
-
 	loc, ok := s.dMap.ProvinceMap[province]
 	if !ok {
 		return nil
 	}
-
 	return loc
 }
 

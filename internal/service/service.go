@@ -4,7 +4,6 @@ import (
 	"challange2016/internal/models"
 	"challange2016/internal/store"
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -19,7 +18,6 @@ func New(store store.Store) *service {
 }
 
 func (s *service) AddDistributor(reqBody *models.Distributor) (*models.Distributor, error) {
-	fmt.Println("checking pas throgugh one")
 	reqBody.Name = strings.ToUpper(reqBody.Name)
 
 	// check whether distributor already exist or not
@@ -27,28 +25,21 @@ func (s *service) AddDistributor(reqBody *models.Distributor) (*models.Distribut
 	if distributor != nil {
 		return nil, errors.New("distributor already exist")
 	}
-	fmt.Println("checking pas throgugh two", reqBody.Include)
 	// initilise include fields
 	reqBody.Include = s.AutoInitialiseFields(reqBody.Include)
-	fmt.Println("checking pas throgugh three", reqBody.Exclude)
 	// initialise exclude fields
 	reqBody.Exclude = s.AutoInitialiseFields(reqBody.Exclude)
-	fmt.Println("checking pas throgugh four")
 	// if parentDistributor exist, assign exclude fields also
 	if reqBody.ParentDistributor != nil {
-		fmt.Println("checking pas throgugh four-1")
 		isAllowed := s.checkParentDistributorPermissions(reqBody)
 		if !isAllowed {
 			return nil, errors.New("Parent Distributor doesn't have permission to distribute these location")
 		}
-		fmt.Println("checking pas throgugh four-2")
 		upperCaseName := strings.ToUpper(*reqBody.ParentDistributor)
 		reqBody.ParentDistributor = &upperCaseName
 	}
-	fmt.Println("checking pas throgugh five")
 	// store layer call
 	response := s.store.AddDistributor(reqBody)
-	fmt.Println("checking pas throgugh six")
 
 	return response, nil
 }
@@ -58,8 +49,6 @@ func (s *service) checkParentDistributorPermissions(distributor *models.Distribu
 	if parentDistributor == nil {
 		return false
 	}
-
-	// check for include/exclude permission
 	for _, loc := range distributor.Include {
 		isIncludeAllowed := checkPermission(parentDistributor.Include, loc)
 		isExcludeAllowed := checkPermission(parentDistributor.Exclude, loc)
@@ -87,7 +76,7 @@ func (s *service) GetDistributorByName(distributorName *string) (*models.Distrib
 	return distributor, nil
 }
 
-func (s *service) CheckDistributorPermission(reqBody models.CheckPermission) bool {
+func (s *service) CheckDistributorPermission(distributorName *string, reqBody models.CheckPermission) bool {
 	switch {
 	case reqBody.DistributorName == nil:
 		return false
@@ -98,13 +87,16 @@ func (s *service) CheckDistributorPermission(reqBody models.CheckPermission) boo
 
 	}
 
-	// retrive the distributor details
-	distributor := s.store.GetDistributorByName(strings.ToUpper(*reqBody.DistributorName))
-	if distributor == nil {
+	if distributorName == nil || *distributorName == "" {
 		return false
 	}
 
-	// check for include location
+	*distributorName = strings.ToUpper(*distributorName)
+
+	distributor := s.store.GetDistributorByName(*distributorName)
+	if distributor == nil {
+		return false
+	}
 	isIncludeLoc := checkPermission(distributor.Include, *reqBody.Loc)
 	if !isIncludeLoc {
 		// return false - as it does have have permission to distribute
@@ -116,6 +108,7 @@ func (s *service) CheckDistributorPermission(reqBody models.CheckPermission) boo
 	for {
 		isExcludeLoc := checkPermission(distributor.Exclude, *reqBody.Loc)
 		if isExcludeLoc {
+
 			return false
 		}
 
@@ -131,7 +124,6 @@ func (s *service) CheckDistributorPermission(reqBody models.CheckPermission) boo
 }
 
 func checkPermission(distributorLoc []models.Location, loc models.Location) bool {
-	// check for country
 	for _, dLoc := range distributorLoc {
 		if strings.EqualFold(dLoc.Country, loc.Country) {
 			if strings.EqualFold(dLoc.Province, loc.Province) || strings.EqualFold(dLoc.Province, "ALL") {

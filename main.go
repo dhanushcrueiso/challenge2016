@@ -71,7 +71,7 @@ func main() {
 				scanner.Scan() // This waits for the user input
 				permission = scanner.Text()
 				permission = strings.TrimSpace(permission)
-				if permission == "EXIT" {
+				if strings.ToUpper(permission) == "EXIT" {
 					distributorobj.Include = includes
 					distributorobj.Exclude = excludes
 					break
@@ -151,6 +151,19 @@ func main() {
 			}
 			fmt.Println("distributor name", distributor)
 		case 3:
+			var distributorName string
+			_, err := fmt.Scan(&distributorName)
+			if err != nil {
+				fmt.Println("Error reading option:", err)
+
+			}
+			//distributor, _ := svc.GetDistributorByName(&distributorName)
+
+			bufio.NewReader(os.Stdin).ReadString('\n')
+			fmt.Println("Enter Distributor Name to Check Permissions")
+			scanner := bufio.NewScanner(os.Stdin)
+			//fmt.Println("distributor name", distributor)
+
 			var permission string
 			scanner.Scan() // This waits for the user input
 			permission = scanner.Text()
@@ -166,18 +179,16 @@ func main() {
 				fmt.Println("invallid input format")
 				break
 			}
-			loc := models.Location{
-				City:     parts[0],
-				Country:  parts[2],
-				Province: parts[1],
-			}
-			checkPermission := models.CheckPermission{
-				DistributorName: &name,
-				Loc:             &loc,
-			}
+			var loc models.Location
 
-			response := svc.CheckDistributorPermission(checkPermission)
-			fmt.Println("response", response)
+			loc.City = parts[0]
+			loc.Province = parts[1]
+			loc.Country = parts[2]
+			var checkPermission models.CheckPermission
+			checkPermission.DistributorName = &name
+			checkPermission.Loc = &loc
+			response := svc.CheckDistributorPermission(&distributorName, checkPermission)
+			fmt.Println("Can Distribute", response)
 		case 4:
 			os.Exit(0)
 		default:
